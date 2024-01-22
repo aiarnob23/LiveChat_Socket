@@ -4,6 +4,7 @@ import Home from "../Pages/Home/Home";
 import Register from "../Pages/Register/Register";
 import Login from "../Pages/Login/Login";
 import Chat from "../Pages/Chat/Chat";
+import PrivateRoute from "./PrivateRoute";
 
 const router = createBrowserRouter([
     {
@@ -24,7 +25,7 @@ const router = createBrowserRouter([
         },
         {
             path: '/chat',
-            element: <Chat></Chat>,
+            element: <PrivateRoute><Chat></Chat></PrivateRoute>,
         },
       ]
     },

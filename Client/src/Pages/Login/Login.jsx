@@ -1,11 +1,14 @@
 import { useContext } from "react";
 import { AuthContext } from "../../AuthProvider/AuthProvider";
 import { errorAlert, successAlert } from "../../../sweetAlerts";
-
+import { useLocation, useNavigate } from "react-router-dom";
 
 
 const Login = () => {
+    const location = useLocation();
+    const navigate = useNavigate();
     const { EmailSignIn, GsignIn } = useContext(AuthContext);
+
     //-------email-pass login
     const handleManualLogin = (e) => {
         e.preventDefault();
@@ -15,25 +18,38 @@ const Login = () => {
         EmailSignIn(email, password)
             .then((result) => {
                 console.log(result);
+                const notificationMessage = 'Login Successful'
+                successAlert(notificationMessage);
+                setTimeout(() => {
+                    navigateToRoutes();
+                }, 600);
+
             })
-            .catch(error => console.log(error));
+            .catch(error => {
+                console.log(error);
+                const notificationMessage = `Login Failed : ${error.message}`;
+                errorAlert(notificationMessage);
+            });
     }
     //-----google login
-    const GLogIn = () => {
+    const GLogIn = async () => {
         GsignIn()
             .then(result => {
                 console.log(result);
                 const notificationMessage = 'Login Successful'
                 successAlert(notificationMessage);
                 setTimeout(() => {
-                    window.location.replace('/');
+                    navigateToRoutes();
                 }, 600);
             })
             .catch(error => {
                 console.log(error);
-                const notificationMessage = `${error.message}`;
-                errorAlert(notificationMessage);
             });
+    }
+
+    //----------navigate to desired route-----
+    const navigateToRoutes = () => {
+        navigate(location?.state ? location.state : '/')
     }
 
 
@@ -82,7 +98,13 @@ const Login = () => {
                                 <p>Login with <button onClick={GLogIn} className="btn  btn-success text-white">Google</button></p>
                             </div>
                         </div>
+
+                        <div>
+                            {/* set error message */}
+                        </div>
+
                     </div>
+
                 </div>
             </div>
         </div>

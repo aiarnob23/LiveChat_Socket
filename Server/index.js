@@ -1,20 +1,43 @@
+//requires
 const express = require('express');
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser');
 require('dotenv').config();
 
 const port = process.env.PORT || 3000;
 
+//middlewares
 const app = express();
-app.use(cors());
+app.use(cookieParser());
+app.use(cors({
+  origin:['http://localhost:5173'],
+  credentials:true,
+}));
 app.use(express.json());
 
-app.get('/',(req,res)=>{
-    res.send('Live Chat server is running');
+//verify json web token middleware
+const verifyToken = async(req,res,next)=>{
+   const token = req.cookies?.token;
+   if(!token){
+    return res.status(401).send({message:'unauthorized'})
+   }
+   jwt.verify(token, process.env.JWT_SECRET,(err,decoded)=>{
+     if(err){
+      return res.status(401).send({message:'unauthorized'})
+     }
+     if(decoded){
+       
+      console.log(decoded);
+      next();
+     }
+   })
+}
+
+
+app.get('/', (req, res) => {
+  res.send('Live Chat server is running');
 })
-
-
-
-
 
 
 const { MongoClient, ServerApiVersion } = require('mongodb');
@@ -34,21 +57,41 @@ async function run() {
     const usersCollection = client.db('LiveChat').collection('Users');
 
     //Post a user to DB
-    app.post('/users',async(req,res)=>{
-        const newUser = req.body;
-        const result = await usersCollection.insertOne(newUser);
-        res.send(result);
+    app.post('/users', async (req, res) => {
+      const newUser = req.body;
+      const result = await usersCollection.insertOne(newUser);
+      res.send(result);
     })
 
     //get users from DB
-    app.get('/users', async(req,res)=>{
-        const cursor = usersCollection.find();
-        const result = await cursor.toArray();
-        res.send(result);
+    app.get('/users',verifyToken, async (req, res) => {
+      const cursor = usersCollection.find();
+      const result = await cursor.toArray();
+      await res.send(result);
     })
- 
+
+    //Json Web Token 
+    app.post('/jwt', async (req, res) => {
+      const user = req.body;
+      const token = jwt.sign({
+        data: user,
+      },
+        process.env.JWT_SECRET,
+        { expiresIn: '1h' }
+      );
+     console.log(token);
+      res
+      .cookie('token', token,{
+        httpOnly:true,
+        secure:true,
+        sameSite:'none'
+      })
+      .send({success:true, status:201});
+
+    })
+
   } finally {
-  
+
   }
 }
 run().catch(console.dir);
@@ -58,7 +101,6 @@ run().catch(console.dir);
 
 
 
-
-app.listen(port, ()=>{
-    console.log('Server is running on port ', port);
+app.listen(port, () => {
+  console.log('Server is running on port ', port);
 })

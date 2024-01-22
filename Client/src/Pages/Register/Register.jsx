@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import { AuthContext } from "../../AuthProvider/AuthProvider";
-import axios from "axios";
 import 'react-toastify/dist/ReactToastify.css';
+import axiosInstance from "../../../axiosConfig";
 
 
 const Register = () => {
@@ -18,23 +18,23 @@ const Register = () => {
         EmailReg(email, password)
             .then((result) => {
                 console.log(result);
-                userToDb(name,email);
+                userToDb(name, email);
             })
             .catch(error => console.error(error))
     }
 
-   //------google register
+    //------google register
     const handleGoogleRegister = () => {
         GsignIn()
-            .then((result)=>{
-            userToDb(result.user.displayName, result.user.email);
+            .then((result) => {
+                userToDb(result.user.displayName, result.user.email);
             })
             .catch(error => console.error(error))
     }
 
     //-----add new user to the DB
     const userToDb = (name, email) => {
-        axios.post('http://localhost:8080/users', {
+        axiosInstance.post('/users', {
             name: name,
             UserEmail: email,
         })
