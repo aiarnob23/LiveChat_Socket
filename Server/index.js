@@ -4,12 +4,21 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 require('dotenv').config();
+const {createServer} = require('node:http');
+const {Server} = require('socket.io');
 
 const port = process.env.PORT || 3000;
 
 //middlewares
 const app = express();
 app.use(cookieParser());
+const server = createServer(app);
+const io = new Server(server,{
+  cors:{
+    origin:['http://localhost:5173'],
+    credentials:true,
+  }
+});
 app.use(cors({
   origin:['http://localhost:5173'],
   credentials:true,
@@ -27,8 +36,6 @@ const verifyToken = async(req,res,next)=>{
       return res.status(401).send({message:'unauthorized'})
      }
      if(decoded){
-       
-      console.log(decoded);
       next();
      }
    })
@@ -97,10 +104,22 @@ async function run() {
 run().catch(console.dir);
 
 
+//message via socket io handle
+
+io.on('connection',(socket)=>{
+  console.log('user connected to server : ', socket.id);
+  socket.on('hi',(msg)=>{
+    socket.broadcast.emit('msg', msg);
+  })
+
+  socket.on('disconnect', () => {
+    console.log('user disconnected from server: ', socket.id);
+});
+})
 
 
 
 
-app.listen(port, () => {
+server.listen(port, () => {
   console.log('Server is running on port ', port);
 })

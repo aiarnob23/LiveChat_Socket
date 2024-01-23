@@ -34,6 +34,7 @@ const AuthProvider = ({ children }) => {
     //onAuth state change handler
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+          if(currentUser){
             setUser(currentUser);
             setLoading(false);
             axiosInstance.post('/jwt', {
@@ -41,9 +42,14 @@ const AuthProvider = ({ children }) => {
             }, {
                 withCredentials: true,
             })
+          }
+          else{
+            setUser(null);
+            setLoading(false);
+          }
         })
         return () => unsubscribe();
-    })
+    },[user])
 
     const authInfo = {
         GsignIn,
