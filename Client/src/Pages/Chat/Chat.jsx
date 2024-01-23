@@ -1,13 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
-import axiosInstance from "../../../axiosConfig";
-import Users from "./users";
-import { io } from "socket.io-client";
 import { useEffect, useMemo, useState } from "react";
-
-
-
-
+import { io } from "socket.io-client";
 const Chat = () => {
+
 
     const [room, setRoom] = useState('');
     const [message, setMessage] = useState('');
@@ -36,7 +30,6 @@ const Chat = () => {
         });
 
         return () => {
-            // Cleanup event listeners
             socket.off('disconnect');
             socket.off('reconnect');
         };
@@ -60,35 +53,18 @@ const Chat = () => {
     }
 
 
-
-
-    //-----------users list--------------
-    const { isPending, error, data } = useQuery({
-        queryKey: ['users'],
-        queryFn: () =>
-            axiosInstance.get('/users', {
-                withCredentials: true,
-            })
-                .then(response => response.data)
-    })
-
-    if (isPending) return 'Loading...'
-
-    if (error) return 'An error has occurred: ' + error.message
-
     // ------------return body------------
     return (
         <div>
 
 
             <div className="flex w-full flex-row">
+
                 {/* users part */}
                 <div className="w-[1/4] border-2 ">
-                    {data.map(user => <Users
-                        key={user._id}
-                        singleUser={user}
-                    ></Users>)}
+                {/*  something will be there  */}
                 </div>
+
                 {/* chatbox part */}
                 <div className="w-[3/4] p-4 border-2">
                     <form onSubmit={handleJoinRoom}>

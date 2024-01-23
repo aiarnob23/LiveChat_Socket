@@ -1,9 +1,11 @@
+import { Link } from "react-router-dom";
 
 
 const Home = () => {
     return (
         <div>
-            Home Page
+            Home Page<br/>
+            <Link to='/chat'>chat</Link>
         </div>
     );
 };
